@@ -68,8 +68,9 @@ struct.experiment.tasks.Match_Mismatch.verbmismatch_trialord = {'pre_verb' 'mism
 struct.experiment.tasks.Match_Mismatch.match_verb_rep = 3;      % Every verb is visualised 3 times as match
 struct.experiment.tasks.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visualised 3 times as mismatch. 
 
-
-
+struct.analysis_info.electrodes_of_interest.midline = {'Fz' 'FCz' 'Cz' 'CPz' 'Pz'};
+struct.analysis_info.electrodes_of_interest.RH = {'F2' 'F4' 'F6' 'FC2' 'FC4' 'FC6' 'C2' 'C4' 'C6' 'CP2' 'CP4' 'CP6' 'P2' 'P4' 'P6'};
+struct.analysis_info.electrodes_of_interest.LH = {'F1' 'F3' 'F5' 'FC1' 'FC3' 'FC5' 'C1' 'C3' 'C5' 'CP1' 'CP3' 'CP5' 'P1' 'P3' 'P5'};
 
 
 
