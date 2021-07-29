@@ -4,7 +4,7 @@
 %*********************************************************************************
 
 mystruct = [];
-mat_path = fullfile(filesep,''); %Path to save mat-file
+mat_path = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG'); %Path to save mat-file
 mat_title = 'EEGVR_L2_Parameters.mat'; 
 
 %% Generate the mystructure. 
@@ -14,7 +14,7 @@ mystruct.sampling_rate = 512;
 mystruct.filter_params.hp_lim = 0.1;
 mystruct.filter_params.lp_lim = 40;
 mystruct.filter_params.filter_type = 'FIR';
-mystruct.filter_params.filter_window = 'Kaiser';
+mystruct.filter_params.filter_window = 'kaiser';
 mystruct.filter_params.order = 1408;
 
 mystruct.reference.info = 'average of mastoids';
@@ -25,15 +25,20 @@ mystruct.segmentation.baseline_ms = [- 150 0];
 mystruct.segmentation.poststim_ms = [0 1100];
 mystruct.segmentation.baseline_correction_ms = [-150 0];
 
-mystruct.paths.chanconfig = fullfile('');
-mystruct.paths.raw_data = fullfile('');
-mystruct.paths.processed_data = fullfile('');
+mystruct.paths.base = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG',filesep);
+mystruct.paths.chanconfig = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Chan_info.mat');
+mystruct.paths.raw_data = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Raw_Data',filesep);
+mystruct.paths.processed_data = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Data',filesep);
 
 mystruct.participant_data.number = [];  % the number of participants
 mystruct.participant_data.groups = {};  % the participant groups
 mystruct.participant_data.ages = [];
 mystruct.participant_data.sex = [];
 mystruct.participant_data.handedness = {};
+
+%Subject naming system.
+mystruct.participant_data.prefixes = {'MM' 'VB' 'MMP' 'VBP'};
+mystruct.participant_data.prefixes_long = {'Mismatch_Pretest' 'Verb_Pretest' 'Mismatch_Posttest' 'Verb_Posttest'}; 
 
 mystruct.acquisition_system.name = 'Biosemi Actiview2';
 mystruct.acquisition_system.electrode_num = 64;
@@ -76,6 +81,8 @@ mystruct.experiment.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visu
 mystruct.analysis_info.electrodes_of_interest.midline = {'Fz' 'FCz' 'Cz' 'CPz' 'Pz'};
 mystruct.analysis_info.electrodes_of_interest.RH = {'F2' 'F4' 'F6' 'FC2' 'FC4' 'FC6' 'C2' 'C4' 'C6' 'CP2' 'CP4' 'CP6' 'P2' 'P4' 'P6'};
 mystruct.analysis_info.electrodes_of_interest.LH = {'F1' 'F3' 'F5' 'FC1' 'FC3' 'FC5' 'C1' 'C3' 'C5' 'CP1' 'CP3' 'CP5' 'P1' 'P3' 'P5'};
+
+
 
 %% SAVE THE MAT-File using the path defined at the start. 
 
