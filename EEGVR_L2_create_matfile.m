@@ -3,74 +3,82 @@
 %  parameters for the EEG-VR_LearnL2 project.
 %*********************************************************************************
 
-struct = [];
+mystruct = [];
+mat_path = fullfile(filesep,''); %Path to save mat-file
+mat_title = 'EEGVR_L2_Parameters.mat'; 
 
-struct.sampling_rate = 512;
+%% Generate the mystructure. 
 
-struct.filter_params.hp_lim = 0.1;
-struct.filter_params.lp_lim = 40;
-struct.filter_params.filter_type = 'FIR';
-struct.filter_params.filter_window = 'Kaiser';
-struct.filter_params.order = 1408;
+mystruct.sampling_rate = 512;
 
-struct.reference.info = 'average of mastoids';
-struct.reference.electrodes_labels = {'mastoidL' 'mastoidR'};
-struct.reference.electrodes_index = [67 69];   % Need to verify this.
+mystruct.filter_params.hp_lim = 0.1;
+mystruct.filter_params.lp_lim = 40;
+mystruct.filter_params.filter_type = 'FIR';
+mystruct.filter_params.filter_window = 'Kaiser';
+mystruct.filter_params.order = 1408;
 
-struct.segmentation.baseline_ms = [- 150 0];
-struct.segmentation.poststim_ms = [0 1100];
-struct.baseline_correction_ms = [-150 0];
+mystruct.reference.info = 'average of mastoids';
+mystruct.reference.electrodes_labels = {'mastoidL' 'mastoidR'};
+mystruct.reference.electrodes_index = [67 69];   % Need to verify this.
 
-struct.paths.chanconfig = fullfile('');
-struct.paths.raw_data = fullfile('');
-struct.paths.processed_data = fullfile('');
+mystruct.segmentation.baseline_ms = [- 150 0];
+mystruct.segmentation.poststim_ms = [0 1100];
+mystruct.segmentation.baseline_correction_ms = [-150 0];
 
-struct.participant_data.number = [];  % the number of participants
-struct.participant_data.groups = {};  % the participant groups
-struct.participant_data.ages = [];
-struct.participant_data.sex = [];
-struct.participant_data.handedness = {};
+mystruct.paths.chanconfig = fullfile('');
+mystruct.paths.raw_data = fullfile('');
+mystruct.paths.processed_data = fullfile('');
 
-struct.acquisition_system.name = 'Biosemi Actiview2';
-struct.acquisition_system.electrode_num = 64;
-struct.acquisition_system.electexterne_labels = {'vertical_eye' 'horizontal_eye' 'left_mastoid' 'right_mastoid'};
-struct.acquisition_system.electexterne_indx = [65 66 67 69];
+mystruct.participant_data.number = [];  % the number of participants
+mystruct.participant_data.groups = {};  % the participant groups
+mystruct.participant_data.ages = [];
+mystruct.participant_data.sex = [];
+mystruct.participant_data.handedness = {};
+
+mystruct.acquisition_system.name = 'Biosemi Actiview2';
+mystruct.acquisition_system.electrode_num = 64;
+mystruct.acquisition_system.electexterne_labels = {'vertical_eye' 'horizontal_eye' 'left_mastoid' 'right_mastoid'};
+mystruct.acquisition_system.electexterne_indx = [65 66 67 69];
 
 % Electrodes and subjects marked as bad during acquisition
-struct.quality_check.bad_electrodes_label = {};
-struct.quality_check.bad_electrodes_indx = [];
-struct.quality_check.bad_participants_indx = {};
+mystruct.quality_check.bad_electrodes_label = {};
+mystruct.quality_check.bad_electrodes_indx = [];
+mystruct.quality_check.bad_participants_indx = {};
 
 % Information on experimental setup.
-struct.experiment.tasks = {'Passive Listening' 'Match-Mismatch'};
-struct.experiment.sessions = {'Pre-learning' 'Post-learning'};
-struct.experiment.trial_types = {'match' 'mismatch'};
-struct.experiment.stimuli_type = 'Verbs';
-struct.experiment.stimuli_modality = 'Auditory';
+mystruct.experiment.tasks = {'Passive Listening' 'Match-Mismatch'};
+mystruct.experiment.sessions = {'Pre-learning' 'Post-learning'};
+mystruct.experiment.trial_types = {'match' 'mismatch'};
+mystruct.experiment.stimuli_type = 'Verbs';
+mystruct.experiment.stimuli_modality = 'Auditory';
 
-struct.experiment.tasks.Passive_Listening.test_verbs = 101:112;
-struct.experiment.tasks.Passive_Listening.test_blocks = 31:33;
-struct.experiment.tasks.Passive_Listening.filler_verbs = 125:136;
-struct.experiment.tasks.Passive_Listening.filler_blocks = 41:43;
-struct.experiment.tasks.Passive_Listening.pre_verb = 96;
-struct.experiment.tasks.Passive_Listening.end_trial = 97;
-struct.experiment.tasks.Passive_Listening.verb_trialord = {'pre_verb' 'test_verbs' 'test_blocks' 'end_trial'};
-struct.experiment.tasks.Passive_Listening.filler_trialord = {'pre_verb' 'filler_verbs' 'filler_blocks' 'end_trial'};
 
-struct.experiment.tasks.Match_Mismatch.match_verbs = 101:112;
-struct.experiment.tasks.Match_Mismatch.match_blocks = 31:33;
-struct.experiment.tasks.Match_Mismatch.mismatch_verbs = 201:212;
-struct.experiment.tasks.Match_Mismatch.mismatch_blocks = 41:43;
-struct.experiment.tasks.Match_Mismatch.pre_verb = 95;
-struct.experiment.tasks.Match_Mismatch.end_trial = 98;
-struct.experiment.tasks.Match_Mismatch.verbmatch_trialord = {'pre_verb' 'match_verbs' 'match_blocks' 'end_trial'};
-struct.experiment.tasks.Match_Mismatch.verbmismatch_trialord = {'pre_verb' 'mismatch_verbs' 'mismatch_blocks' 'end_trial'};
-struct.experiment.tasks.Match_Mismatch.match_verb_rep = 3;      % Every verb is visualised 3 times as match
-struct.experiment.tasks.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visualised 3 times as mismatch. 
+mystruct.experiment.Passive_Listening.test_verbs = [101:112];
+mystruct.experiment.Passive_Listening.test_blocks = [31:33];
+mystruct.experiment.Passive_Listening.filler_verbs = [125:136];
+mystruct.experiment.Passive_Listening.filler_blocks = [41:43];
+mystruct.experiment.Passive_Listening.pre_verb = 96;
+mystruct.experiment.Passive_Listening.end_trial = 97;
+mystruct.experiment.Passive_Listening.verb_trialord = {'pre_verb' 'test_verbs' 'test_blocks' 'end_trial'};
+mystruct.experiment.Passive_Listening.filler_trialord = {'pre_verb' 'filler_verbs' 'filler_blocks' 'end_trial'};
 
-struct.analysis_info.electrodes_of_interest.midline = {'Fz' 'FCz' 'Cz' 'CPz' 'Pz'};
-struct.analysis_info.electrodes_of_interest.RH = {'F2' 'F4' 'F6' 'FC2' 'FC4' 'FC6' 'C2' 'C4' 'C6' 'CP2' 'CP4' 'CP6' 'P2' 'P4' 'P6'};
-struct.analysis_info.electrodes_of_interest.LH = {'F1' 'F3' 'F5' 'FC1' 'FC3' 'FC5' 'C1' 'C3' 'C5' 'CP1' 'CP3' 'CP5' 'P1' 'P3' 'P5'};
+mystruct.experiment.Match_Mismatch.match_verbs = [101:112];
+mystruct.experiment.Match_Mismatch.match_blocks = [31:33];
+mystruct.experiment.Match_Mismatch.mismatch_verbs = [201:212];
+mystruct.experiment.Match_Mismatch.mismatch_blocks = [41:43];
+mystruct.experiment.Match_Mismatch.pre_verb = 95;
+mystruct.experiment.Match_Mismatch.end_trial = 98;
+mystruct.experiment.Match_Mismatch.verbmatch_trialord = {'pre_verb' 'match_verbs' 'match_blocks' 'end_trial'};
+mystruct.experiment.Match_Mismatch.verbmismatch_trialord = {'pre_verb' 'mismatch_verbs' 'mismatch_blocks' 'end_trial'};
+mystruct.experiment.Match_Mismatch.match_verb_rep = 3;      % Every verb is visualised 3 times as match
+mystruct.experiment.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visualised 3 times as mismatch. 
 
+mystruct.analysis_info.electrodes_of_interest.midline = {'Fz' 'FCz' 'Cz' 'CPz' 'Pz'};
+mystruct.analysis_info.electrodes_of_interest.RH = {'F2' 'F4' 'F6' 'FC2' 'FC4' 'FC6' 'C2' 'C4' 'C6' 'CP2' 'CP4' 'CP6' 'P2' 'P4' 'P6'};
+mystruct.analysis_info.electrodes_of_interest.LH = {'F1' 'F3' 'F5' 'FC1' 'FC3' 'FC5' 'C1' 'C3' 'C5' 'CP1' 'CP3' 'CP5' 'P1' 'P3' 'P5'};
+
+%% SAVE THE MAT-File using the path defined at the start. 
+
+save(fullfile(mat_path,mat_title),'mystruct'); 
 
 
