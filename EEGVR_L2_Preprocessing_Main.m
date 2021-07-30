@@ -47,7 +47,7 @@ filenom= {filenum.name};  % the *.bdf file names
 % 4- Filtering
 
 
-for counter = 1:1  %length(filenom)
+for counter = 1:length(filenom)
     
     %% LOAD IN THE CURRENT SUBJECT DATA
     curr_suj = filenom{1, counter};
