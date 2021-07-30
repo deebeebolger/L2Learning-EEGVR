@@ -3,19 +3,25 @@
 %  parameters for the EEG-VR_LearnL2 project.
 %*********************************************************************************
 
+function EEGVR_L2_create_matfile()
+
 mystruct = [];
 mat_path = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG'); %Path to save mat-file
-mat_title = 'EEGVR_L2_Parameters.mat'; 
+mat_title = 'EEGVR_L2_Parameters.mat';
 
-%% Generate the mystructure. 
+%% Generate the mystructure.
 
 mystruct.sampling_rate = 512;
 
+% Define kaiser window filter parameters. 
+% The filter order is calculated on the basis of the parameters. 
 mystruct.filter_params.hp_lim = 0.1;
 mystruct.filter_params.lp_lim = 40;
 mystruct.filter_params.filter_type = 'FIR';
 mystruct.filter_params.filter_window = 'kaiser';
-mystruct.filter_params.order = 1408;
+mystruct.filter_params.band_edges = [0.05 0.1 40 41];
+mystruct.filter_params.band_amplitude = [0 1 0];
+mystruct.filter_params.dev_min = [0.01 0.05 0.01];
 
 mystruct.reference.info = 'average of mastoids';
 mystruct.reference.electrodes_labels = {'mastoidL' 'mastoidR'};
@@ -26,7 +32,8 @@ mystruct.segmentation.poststim_ms = [0 1100];
 mystruct.segmentation.baseline_correction_ms = [-150 0];
 
 mystruct.paths.base = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG',filesep);
-mystruct.paths.chanconfig = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Chan_info.mat');
+mystruct.paths.chanconfig = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Chaninfo.mat');
+mystruct.paths.chaninfo = fullfile(filesep,'Users','bolger','Documents','MATLAB','eeglab2020_0','plugins','dipfit','standard_BESA','standard-10-5-cap385.elp');
 mystruct.paths.raw_data = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Raw_Data',filesep);
 mystruct.paths.processed_data = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Data',filesep);
 
@@ -38,7 +45,7 @@ mystruct.participant_data.handedness = {};
 
 %Subject naming system.
 mystruct.participant_data.prefixes = {'MM' 'VB' 'MMP' 'VBP'};
-mystruct.participant_data.prefixes_long = {'Mismatch_Pretest' 'Verb_Pretest' 'Mismatch_Posttest' 'Verb_Posttest'}; 
+mystruct.participant_data.prefixes_long = {'Mismatch_Pretest' 'Verb_Pretest' 'Mismatch_Posttest' 'Verb_Posttest'};
 
 mystruct.acquisition_system.name = 'Biosemi Actiview2';
 mystruct.acquisition_system.electrode_num = 64;
@@ -76,7 +83,7 @@ mystruct.experiment.Match_Mismatch.end_trial = 98;
 mystruct.experiment.Match_Mismatch.verbmatch_trialord = {'pre_verb' 'match_verbs' 'match_blocks' 'end_trial'};
 mystruct.experiment.Match_Mismatch.verbmismatch_trialord = {'pre_verb' 'mismatch_verbs' 'mismatch_blocks' 'end_trial'};
 mystruct.experiment.Match_Mismatch.match_verb_rep = 3;      % Every verb is visualised 3 times as match
-mystruct.experiment.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visualised 3 times as mismatch. 
+mystruct.experiment.Match_Mismatch.mismatch_verb_rep = 3;   % Every verb is visualised 3 times as mismatch.
 
 mystruct.analysis_info.electrodes_of_interest.midline = {'Fz' 'FCz' 'Cz' 'CPz' 'Pz'};
 mystruct.analysis_info.electrodes_of_interest.RH = {'F2' 'F4' 'F6' 'FC2' 'FC4' 'FC6' 'C2' 'C4' 'C6' 'CP2' 'CP4' 'CP6' 'P2' 'P4' 'P6'};
@@ -84,8 +91,8 @@ mystruct.analysis_info.electrodes_of_interest.LH = {'F1' 'F3' 'F5' 'FC1' 'FC3' '
 
 
 
-%% SAVE THE MAT-File using the path defined at the start. 
+%% SAVE THE MAT-File using the path defined at the start.
 
-save(fullfile(mat_path,mat_title),'mystruct'); 
+save(fullfile(mat_path,mat_title),'mystruct');
 
-
+end

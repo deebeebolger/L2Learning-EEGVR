@@ -7,6 +7,10 @@
 % The following functions are called:
 % Needs to be filled in...
 
+%% CALL OF FUNCTION TO GENERATE THE PARAMETERS MAT-FILE
+
+EEGVR_L2_create_matfile()
+
 %% OPEN THE PARAMETERS MAT-FILE 
 % The parameter mat-file contains the necessary pre-processing parameters.
 
@@ -14,10 +18,6 @@ Path_Params = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VRE
 load(fullfile(Path_Params,'EEGVR_L2_Parameters.mat'));
 
 prefx = mystruct.participant_data.prefixes;
-
-%% OPEN EEGLAB SESSION AND LOAD BDF FILE OF CURRENT SUBJECT.
-% A folder is created for the current subject in which all pre-processed
-% *.set files will be saved.
 
 %% Open EEGLAB 
 
@@ -32,6 +32,7 @@ pathbase = mystruct.paths.base;
 pathraw = mystruct.paths.raw_data;
 pathproc = mystruct.paths.processed_data;
 pathchan = mystruct.paths.chanconfig;
+pathchan_info = mystruct.paths.chaninfo;
 
 allfiles= dir(pathraw);
 filenum=dir(strcat(pathraw,'*.bdf')); %find all the *.bdf files in the current folder
@@ -46,11 +47,11 @@ filenom= {filenum.name};  % the *.bdf file names
 % 4- Filtering
 
 
-for counter = 1:length(filenom)
+for counter = 1:1  %length(filenom)
     
     %% LOAD IN THE CURRENT SUBJECT DATA
     curr_suj = filenom{1, counter};
-    EEG = pop_biosig(pathraw, 'channels',[1:72], 'ref', [] ,'refoptions',{'keepref' 'off'} );
+    EEG = pop_biosig(fullfile(pathraw,curr_suj), 'channels',[1:72], 'ref', [] ,'refoptions',{'keepref' 'off'} );
     [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(filenom{1,counter}),'gui','off'); 
     [ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG, CURRENTSET);
     EEG = eeg_checkset( EEG );
@@ -62,13 +63,13 @@ for counter = 1:length(filenom)
     end
     
     % CREATE NEW FOLDER FOR CURRENT SUBJECT IN PROCESSED DATA FOLDER
-    pathcurr = fullfile(pathproc,prefx{ispresent},filesep)
+    pathcurr = fullfile(pathproc,prefx{ispresent},filesep);
     if ~exist(fullfile(pathcurr,curr_suj(1:end-4)),'dir')
         [~,~] = mkdir(pathcurr,curr_suj(1:end-4)); 
     end
     
     pathsuj = fullfile(pathcurr,curr_suj(1:end-4),filesep);  % The path for the current subject. 
-    fnom_raw = curr_suj; 
+    fnom_raw = curr_suj(1:end-4); 
     
     % SAVE THE CURRENT SUBJECT DATA AS *.SET FILE
     EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
@@ -83,7 +84,7 @@ for counter = 1:length(filenom)
     
 
     fnom_chans = strcat(fnom_raw,'-chan');
-    EEG = pop_chanedit(EEG, 'lookup',pathchan);                % Load channel path information
+    EEG = pop_chanedit(EEG, 'lookup',pathchan_info);                % Load channel path information
     [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
     EEG = eeg_checkset( EEG );
     EEG = pop_saveset( EEG, 'filename',char(fnom_chans),'filepath',pathsuj);
@@ -95,7 +96,7 @@ for counter = 1:length(filenom)
     fname = strcat(curr_suj,'-info.txt');
     fdir = strcat(pathsuj,fname);
     fid = fopen(fdir,'w');
-    fprintf(fid,['---------',sujcurr,'----------\n']);
+    fprintf(fid,['---------',curr_suj,'----------\n']);
     
     %% RESAMPLE DATA TO THE SAMPLING RATE DEFINED IN THE PARAMETER FILE (IF REQUIRED)
     % Resamples using the EEG resampling function.
@@ -136,10 +137,18 @@ for counter = 1:length(filenom)
     filter_wind = mystruct.filter_params.filter_window;
     fnom_filt = strcat(fnom_rs, '-filt');
 
-    disp('*********************************Bandpass filtering using a FIR windowed sinc filter***********************************')
+    disp('*********************************Bandpass filtering using a FIR windowed sinc filter***********************************\n')
+    disp('This could be a bit slow as filter order is quite high!');
     
-    [M, ~] = pop_firwsord(filter_wind,EEG.srate, 2);
-    [EEG,~,b] = pop_firws(EEG,'fcutoff',[f_low f_hi],'forder',M,'ftype','bandpass','wtype',filter_wind);
+    fsamp = EEG.srate;
+    fcuts = mystruct.filter_params.band_edges;
+    mags  =  mystruct.filter_params.band_amplitude ;
+    devs  =  mystruct.filter_params.dev_min;
+
+    [M,Wn,beta,ftype] = kaiserord(fcuts,mags,devs,fsamp);   % Calculate filter order and beta (shape factor)
+     M = M + rem(M,2);                                      % Filter order must be even. 
+    
+    [EEG,~,b] = pop_firws(EEG,'fcutoff',[f_low f_hi],'forder',M,'ftype','bandpass','wtype',filter_wind, 'warg',beta);
     fvtool(b);                                                                                               % Visualise the filter characteristics
     [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_filt),'gui','off');   % Save the resampled data as a newdata set.
     EEG = eeg_checkset( EEG );
@@ -163,7 +172,7 @@ for counter = 1:length(filenom)
     %% VISUALISE THE SPECTRA OF ALL SCALP ELECTRODES BEFORE RE-REFERENCING.
     % The spectrum is saved as a *.fig file. 
 
-    specnom_scalp = fullfile(DIRsave_curr,strcat(fnom_filt,'-spectscalp'));
+    specnom_scalp = fullfile(pathsuj,strcat(fnom_filt,'-spectscalp'));
 
     CREx_SpectCalc_multitap(EEG,1:64,[1 60],specnom_scalp,.05);
     
@@ -188,38 +197,23 @@ for counter = 1:length(filenom)
     
     %% REJECT ANY ELECTRODES THAT WERE MARKED FOR GENERAL REJECTION DURING DATA ACQUISITION
     
-    chans2rej = mystruct.quality_check.bad_electrodes_indx;
-    fnom_rej1 = strcat(fnom_ref,'-chanrej1');
-    EEG=pop_select(EEG,'nochannel',chans2rej);
-    [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_rej1),'gui','off'); % current set = xx;
-    EEG = eeg_checkset( EEG );
-    EEG = pop_saveset( EEG, 'filename',char(fnom_rej1),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
-    eeglab redraw
+    if ~isempty(mystruct.quality_check.bad_electrodes_indx)
+    
+        chans2rej = mystruct.quality_check.bad_electrodes_indx;
+        fnom_rej1 = strcat(fnom_ref,'-chanrej1');
+        EEG=pop_select(EEG,'nochannel',chans2rej);
+        [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_rej1),'gui','off'); % current set = xx;
+        EEG = eeg_checkset( EEG );
+        EEG = pop_saveset( EEG, 'filename',char(fnom_rej1),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
+        eeglab redraw
+    else 
+        disp('---------------No electrodes marked for rejection at this point------------');
+    end
     
     
 end
 
 
-%% CALL OF FUNCTION TO ADD TRIGGER INFORMATION THE EEGLAB EEG EVENTS STRUCTURE. 
-% This function is specific to L2LearnVR project.
-% It completes block number information missing from the EEGLAB data
-% structure by consulting the logfiles for each subjects.
-
-fileIn = 'trigs_learning_paradigm.xlsx';  % Excel file defining the individual items and their corresponding triggers.
-fileIn_full = fullfile(pathnom,fileIn);
-logfilein = 'Subject-logfiles.xlsx';   % Excel file containing log files (from *.dat files) for each subject. There is a subject par sheet.
-logfileIn_full = fullfile(pathnom,logfilein);
-
-% Call of function 
-EEG = L2LearnVR_trig(EEG, fileIn_full, logfileIn_full, sujcurr);
-
-% Save new event information to a new dataset, with "trigcorr" added. 
-fnom_new = strcat(sujcurr,'-trigcorr');
-[ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_new),'gui','off');   %save the resampled data as a newdata set.
-EEG = eeg_checkset( EEG );
-EEG = pop_saveset( EEG, 'filename',char(fnom_new),'filepath',DIRsave_curr);
-EEG = eeg_checkset( EEG );
-eeglab redraw
 
 
 
