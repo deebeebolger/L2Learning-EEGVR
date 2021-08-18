@@ -82,13 +82,35 @@ for counter = 1:1  %length(filenom)
     % From EEGLAB plugins, the file, "standard-10-5-cap385.elp" is loaded
     % as this contains the correct coordinates for the 10-20 system used here.
     
-
     fnom_chans = strcat(fnom_raw,'-chan');
     EEG = pop_chanedit(EEG, 'lookup',pathchan_info);                % Load channel path information
     [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
     EEG = eeg_checkset( EEG );
     EEG = pop_saveset( EEG, 'filename',char(fnom_chans),'filepath',pathsuj);
     eeglab redraw
+    
+    %% Correct the channels labels if required.
+    fnom_chans = EEG.setname;
+    X =char({EEG.chanlocs.labels});
+    if strcmp(X(1,1:2),'1-')
+        labels_corr = X(:,3:end);
+
+        for cntr = 1:length(EEG.chanlocs)
+
+            EEG.chanlocs(cntr).labels = labels_corr(cntr,:);
+
+        end
+        
+        [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
+        EEG = eeg_checkset( EEG );
+        EEG = pop_saveset( EEG, 'filename',char(fnom_chans),'filepath',pathsuj);
+        eeglab redraw
+
+    else
+        
+       disp('***************Cool! Channels labels are all good********************$')
+        
+    end
     
     %% PREPARE INFORMATION TEXT-FILE FOR THE CURRENT SUBJECT.
     % This textfile should be saved in each subject folder.
