@@ -75,6 +75,15 @@ for counter = 1:1  %length(filenom)
     EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
     eeglab redraw
     
+    %% CORRECT THE TRIGGER CODES
+   
+    EEG = EEGVR_L2_addconds(EEG, mystruct)
+   
+    [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
+    EEG = eeg_checkset( EEG );
+    EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);
+    eeglab redraw
+    
     %% ADD CHANNEL INFORMATION TO THE CURRENT DATASET.
     % Channel coordinates and labels are added to the current dataset and
     % the dataset is saved to the current subject-level directory.
