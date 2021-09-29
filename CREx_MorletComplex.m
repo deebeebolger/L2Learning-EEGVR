@@ -1,4 +1,26 @@
-
+%% Script to carry out time-frequency analysis of segmented EEG data.
+% The time-frequency analysis is carried out using complex Morlet wavelets.
+% The spectral bandwidth is defined by defining the fwhm and the empirical
+% fwhm is estimated for each frequency of interest and expressed in time
+% and frequency domain. 
+% The resulting time-frequency map is converted to ERSP by baseline
+% correction. 
+% Baseline correction is carried out by calling the function
+% CREX_TF_baseline(). This function gives the possibility of carrying out
+% the following baseline corrections:
+% 1. decibel conversion
+% 2. Percentage change
+% 3. Express post-stimulus activity as z-score in relation to baseline
+% interval.
+% This script carries out the time-frequency decomposition for a single
+% subject.
+% This script carries out baseline decomposition for a single subject. The
+% time-frequency matrix (ERSP) is saved as a matfile using the current
+% filepath defined for the current dataset.
+% The script expects a segmented EEGLAB *.set file.
+% The ERSP is plotted for all electrodes of interest. 
+% Programmed by: D. Bolger                 Date: 28-09-2021
+%***************************************************************************
 
 %% Open EEGLAB 
 
@@ -60,18 +82,21 @@ for ecnt = 1:length(eindx)
     for trcnt = 1:size(DIn,3)
         
         for fcnt = 1:length(foi)
+            
             Dcurr = DIn(eindx(ecnt),:,trcnt);
-            DIn_fft = fft(Dcurr,nConv, 2);
-            gwin = exp( (-4*log(2)*wavet.^2) ./ fwhm(fcnt)^2 );               % Calculate the gaussian using the current fwhm value.
+            DIn_fft = fft(Dcurr,nConv, 2);                                          % fft of current signal (single trial).
+            
+            gwin = exp( (-4*log(2)*wavet.^2) ./ fwhm(fcnt)^2 );                     % Calculate the gaussian using the current fwhm value.
             empfwhm(fcnt,trcnt,1) = wavet(midp-1+dsearchn(gwin(midp:end)',.5));     % Calculate the empirical fwhm (time domain)
             empfwhm(fcnt,trcnt,2) = 1/empfwhm(fcnt,1);                              % Calculate the empirical fwhm (spectral domain)
             
-            waveX = fft( exp(2*1i*pi*foi(fcnt)*wavet).*gwin,nConv );
-            waveX_norm = waveX./max(waveX);                                   % Normalize
-            DInConv = ifft(waveX_norm.*DIn_fft);                              % Convolve
-            tf_pow = abs(DInConv).^2;                                         % Calculate the power
-            tf(fcnt,:,trcnt) = tf_pow(wavlen_half:end-wavlen_half+1);         % Trim and reshape
-            bl(fcnt,:,trcnt) = tf(fcnt,blindx,trcnt);                         % Extract the baseline.
+            waveX = fft( exp(2*1i*pi*foi(fcnt)*wavet).*gwin,nConv );                % Calculate the complex Morlet wavelet for fois, given FWHM
+            waveX_norm = waveX./max(waveX);                                         % Normalize
+            
+            DInConv = ifft(waveX_norm.*DIn_fft);                                    % Convolve (find ifft of product signal and wavelet).
+            tf_pow = abs(DInConv).^2;                                               % Calculate the power
+            tf(fcnt,:,trcnt) = tf_pow(wavlen_half:end-wavlen_half+1);               % Trim and reshape
+            bl(fcnt,:,trcnt) = tf(fcnt,blindx,trcnt);                               % Extract the baseline.
             
         end
         
