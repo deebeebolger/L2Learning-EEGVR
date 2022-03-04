@@ -57,8 +57,8 @@ fwhm = linspace(0.4, 0.1, numel(foi));
 %% Calculate the complex Morlet wavelet for each center frequency of interest.
 
 % initialize time intervals of interest.
-tindx = [T>=-0.5 & T<=1.3];
-blindx = [T>=-0.5 & T<=0];
+tindx = [T>=-0.15 & T<=1.3];
+blindx = [T>=-0.15 & T<=0];
 Tnew = T(tindx);
 tpostindx = [Tnew>=0 & Tnew<=1.3];
 
@@ -166,15 +166,18 @@ for ecounter = 1:length(eindx)
     ax1(ecounter) = subplot(row,ceil(64/row),ecounter);
     imagesc('Parent',ax1(ecounter),'XData',T(tindx),'YData',foi,'CData',meanTFBL{1,ecounter},'CDataMapping','scaled')
     xlim([Tnew(1) Tnew(end)]);
-    ax1(ecounter).YLim = [4 40];
-    ax1(ecounter).CLim = clim;
+    ax1(ecounter).YLim = [4 40];                    %Set Y-axis limites 
+    ax1(ecounter).CLim = clim;                      %Set time-frequency power limits.
     ax1(ecounter).Layer = 'top';
+    ax1(ecounter).XLabel.String = 'Time (seconds)'; %Set x-axis label
+    ax1(ecounter).YLabel.String = 'Frequency (Hz)'; %Set y-axis label
     
     hold on
     plot(ax1(ecounter),T,coi,'w--','linewidth',2)
-    title([chans{ecounter},' : ',bltype]);
+    title([chans{ecounter},' : ',bltype]);          
     colormap(ax1(ecounter),jet);
-    colorbar;
+    cb(ecounter) = colorbar;                                 %Colorbar
+    cb(ecounter).Label.String = ['ERSP (',bltype(1:2),' )']; %Colorbar title defined
     set(ax1(ecounter),'HitTest','on','SelectionHighlight','on','UserData',{T,tindx,foi,meanTFBL{1,ecounter},clim,chans{ecounter},bltype,coi},'Nextplot','replace');
     set(ax1(ecounter),'ButtonDownFcn',@plotsingle_tf)
 

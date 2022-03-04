@@ -20,11 +20,14 @@ function plotsingle_tf(hdl,~)
     ax.YLim = [4 40];
     ax.CLim = powlims;
     ax.Layer = 'top';
+    ax.XLabel.String = 'Time (seconds)';
+    ax.YLabel.String = 'Frequency (Hz)';
     
     hold on
     plot(ax,time,cone_oi,'w--','linewidth',2)
     title([currchan,' : ',blstring]);
     colormap(ax,jet);
-    colorbar;
+    cb = colorbar;
+    cb.Label.String = ['ERSP (',blstring(1:2),' )'];
 
 end
