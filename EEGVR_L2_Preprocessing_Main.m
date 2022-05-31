@@ -10,6 +10,7 @@
 %% CALL OF FUNCTION TO GENERATE THE PARAMETERS MAT-FILE
 
 EEGVR_L2_create_matfile()
+%% 
 
 %% OPEN THE PARAMETERS MAT-FILE 
 % The parameter mat-file contains the necessary pre-processing parameters.
@@ -58,12 +59,12 @@ for counter = 1:1  %length(filenom)
     
     % CREATE NEW FOLDER FOR SESSION CONDITIONS IN PROCESSED DATA FOLDER
     ispresent = cellfun(@(s) contains(curr_suj, s),prefx);
-    if ~exist(fullfile(pathproc,prefx{ispresent}),'dir')
-        [~,~] = mkdir(pathproc,prefx{ispresent}); 
+    if ~exist(fullfile(pathproc,prefx{ispresent}(1:end-1)),'dir')
+        [~,~] = mkdir(pathproc,prefx{ispresent}(1:end-1)); 
     end
     
     % CREATE NEW FOLDER FOR CURRENT SUBJECT IN PROCESSED DATA FOLDER
-    pathcurr = fullfile(pathproc,prefx{ispresent},filesep);
+    pathcurr = fullfile(pathproc,prefx{ispresent}(1:end-1),filesep);
     if ~exist(fullfile(pathcurr,curr_suj(1:end-4)),'dir')
         [~,~] = mkdir(pathcurr,curr_suj(1:end-4)); 
     end
@@ -72,10 +73,11 @@ for counter = 1:1  %length(filenom)
     fnom_raw = curr_suj(1:end-4); 
     
     % SAVE THE CURRENT SUBJECT DATA AS *.SET FILE
+    EEG.setname = fnom_raw;
     EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
     eeglab redraw
     
-    %% CORRECT THE TRIGGER CODES
+   %% Correct the trigger codes
    
     EEG = EEGVR_L2_addconds(EEG, mystruct)
    
@@ -83,6 +85,30 @@ for counter = 1:1  %length(filenom)
     EEG = eeg_checkset( EEG );
     EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);
     eeglab redraw
+    
+    %% Correct the channels labels if required.
+  
+    X =char({EEG.chanlocs.labels});
+    if strcmp(X(1,1:2),'1-')
+        labels_corr = X(:,3:end);
+       
+
+        for cntr = 1:length(EEG.chanlocs)
+            
+            EEG.chanlocs(cntr).labels = labels_corr(cntr,find(~isspace(labels_corr(cntr,:))));
+
+        end
+        
+        [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
+        EEG = eeg_checkset( EEG );
+        EEG = pop_saveset( EEG, 'filename',char(fnom_raw),'filepath',pathsuj);
+        eeglab redraw
+
+    else
+        
+       disp('***************Cool! Channels labels are all good********************$')
+        
+    end
     
     %% ADD CHANNEL INFORMATION TO THE CURRENT DATASET.
     % Channel coordinates and labels are added to the current dataset and
@@ -97,29 +123,6 @@ for counter = 1:1  %length(filenom)
     EEG = eeg_checkset( EEG );
     EEG = pop_saveset( EEG, 'filename',char(fnom_chans),'filepath',pathsuj);
     eeglab redraw
-    
-    %% Correct the channels labels if required.
-    fnom_chans = EEG.setname;
-    X =char({EEG.chanlocs.labels});
-    if strcmp(X(1,1:2),'1-')
-        labels_corr = X(:,3:end);
-
-        for cntr = 1:length(EEG.chanlocs)
-
-            EEG.chanlocs(cntr).labels = labels_corr(cntr,:);
-
-        end
-        
-        [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
-        EEG = eeg_checkset( EEG );
-        EEG = pop_saveset( EEG, 'filename',char(fnom_chans),'filepath',pathsuj);
-        eeglab redraw
-
-    else
-        
-       disp('***************Cool! Channels labels are all good********************$')
-        
-    end
     
     %% PREPARE INFORMATION TEXT-FILE FOR THE CURRENT SUBJECT.
     % This textfile should be saved in each subject folder.
@@ -230,14 +233,46 @@ for counter = 1:1  %length(filenom)
     
     if ~isempty(mystruct.quality_check.bad_electrodes_indx)
     
-        chans2rej = mystruct.quality_check.bad_electrodes_indx;
+        if ~isfield(EEG,'chanlocs_pre_rej')
+            chanlocs_pre = EEG.chanlocs;
+            EEG.chanlocs_prerej = chanlocs_pre;
+        end
+        
+        rejindx = mystruct.quality_check.bad_electrodes_indx;
+        chans2rej = {EEG.chanlocs(rejindx).labels};
+        
+        EEG.rejchans = chans2rej;
+        EEG.rejchans_indx = rejindx;
+        
         fnom_rej1 = strcat(fnom_ref,'-chanrej1');
-        EEG=pop_select(EEG,'nochannel',chans2rej);
+        EEG=pop_select(EEG,'nochannel',rejindx);
+        
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_rej1),'gui','off'); % current set = xx;
         EEG = eeg_checkset( EEG );
         EEG = pop_saveset( EEG, 'filename',char(fnom_rej1),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
         eeglab redraw
-    else 
+        
+    elseif ~isempty(mystruct.quality_check.bad_electrodes_label)
+        
+        if ~isfield(EEG,'chanlocs_pre_rej')
+            chanlocs_pre = EEG.chanlocs;
+            EEG.chanlocs_prerej = chanlocs_pre;
+        end
+        
+        chans2rej = mystruct.quality_check.bad_electrodes_label;
+        rejindx = find(ismember({EEG.chanlocs.labels},chans2rej));
+        
+        EEG.rejchans = chans2rej;
+        EEG.rejchans_indx = rejindx;
+        
+        fnom_rej1 = strcat(fnom_ref,'-chanrej1');
+        EEG=pop_select(EEG,'nochannel',rejindx);
+        [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(fnom_rej1),'gui','off'); % current set = xx;
+        EEG = eeg_checkset( EEG );
+        EEG = pop_saveset( EEG, 'filename',char(fnom_rej1),'filepath',pathsuj);  % Saves a copy of the current resampled dataset to the current directory
+        eeglab redraw
+        
+    else
         disp('---------------No electrodes marked for rejection at this point------------');
     end
     
