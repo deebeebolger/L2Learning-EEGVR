@@ -189,10 +189,10 @@ switch answr
         EEG = eeg_checkset( EEG );
         eeglab redraw
 
-    case 'SegmentConds'
+    case 'SeparateConds'
 
-        
-        segDir = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Segmented_Data',filesep);
+        segDir = uigetdir(cd,'Choose a folder in which to save data');
+        %segDir = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Segmented_Data',filesep);
 
         [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;                %open eeglab session
         [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
@@ -286,7 +286,7 @@ switch answr
 
         %%
         
-        pathsuj = fullfile(segDir,'VBP',filesep);
+        pathsuj = fullfile(segDir,filesep);
         D = dir(pathsuj);
         parent_folder = D.folder;
         
