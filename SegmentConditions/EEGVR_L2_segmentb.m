@@ -307,7 +307,7 @@ switch answr
         [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(epoched_name),'gui','off');
         EEG = eeg_checkset( EEG );
 %% 
-
+         
         EEG = pop_saveset( EEG, 'filename',char(epoched_name),'filepath',savedir);
         EEG = eeg_checkset( EEG );
         eeglab redraw
