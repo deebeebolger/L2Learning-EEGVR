@@ -1,3 +1,6 @@
+%% Most recent version of the Segmentation Tool for the EEGVR_l2Learning project.
+
+
 
 list = {'SegmentAll','SeparateConds'};
 [indx,tf] = listdlg('PromptString','Select the segmentation type:','SelectionMode','single','ListString',list,...
