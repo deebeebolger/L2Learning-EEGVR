@@ -1,4 +1,10 @@
-%% Most recent version of the Segmentation Tool for the EEGVR_l2Learning project.
+% Programmed by: D. Bolger       Date: June 2022
+% Most recent version of the Segmentation Tool for the EEGVR_l2Learning project.
+%  A few things to note:
+%  - You have to first load in the excel file "VERB_TRIGS.xlsx" - a dialogue box opens automatically allowing you manually search for this file.
+%  - Then you have to load in the *.mat file, "EEGVR_L2_Parameters.mat" file - again a dialogue box opens automatically allowing you to search for this file.
+%  - A little message box opens allowing you to define the verbs that you want to exclude. But you can leave this blank if you want to keep all the items.
+%  - Once you have manually loaded in all the files that you want to segment, you can select which verb types, block numbers, items and responses (correct/incorrect) that you want to include in the segmentation.
 
 
 
