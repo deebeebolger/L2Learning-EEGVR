@@ -20,8 +20,9 @@ switch answr
 
         %% LOAD IN THE INDIVIDUAL VERB DATA AND ADD TO THE EVENTS FIELD OF THE CURRENT EEG STRUCTURE
 
-
+        helpdlg("Load in the VERB_TRIGS.xlsx file");
         [TrigInfile, TrigInpath] = uigetfile({'*.xlsx'},'Load in the VERB_TRIGS.xlsx file');
+        helpdlg("Load in the EEGVR_L2_Parameters.mat file");
         [ParamInfile, ParamInpath] = uigetfile({'*.mat'}, 'Load in the EEGVR_L2_Parameters.mat file');
 
         %If you want to load in the two initial files automatically, you
@@ -73,6 +74,8 @@ switch answr
         [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;                %open eeglab session
         [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
 
+        fprintf('%s\n', '*********** Load in the *.set files************')
+
         [ALLEEG, EEG] = pop_loadset();
         dataset_len = length(ALLEEG);
 
@@ -82,6 +85,8 @@ switch answr
             EEG = eeg_checkset( EEG );
             EEG = pop_saveset( EEG, 'filename',char(EEG.setname),'filepath',EEG.filepath);  % Saves a copy of the current resampled dataset to the current directory
             eeglab redraw
+
+            fprintf('File %s loaded\n',EEG.setname)
 
             %% ADD INDIVIDUAL ITEM NAMES TO THE EEG STRUCTURE
 
