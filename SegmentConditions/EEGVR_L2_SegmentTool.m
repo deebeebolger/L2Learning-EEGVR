@@ -24,6 +24,17 @@ switch answr
         [TrigInfile, TrigInpath] = uigetfile({'*.xlsx'},'Load in the VERB_TRIGS.xlsx file');
         [ParamInfile, ParamInpath] = uigetfile({'*.mat'}, 'Load in the EEGVR_L2_Parameters.mat file');
 
+        %If you want to load in the two initial files automatically, you
+        %will need to define, hard code, the two paths and the names of the
+        % files in the following way (uncomment the following lines and
+        % comment the above two lines with "uigetfile"):
+        
+        % TrigInfile = 'VERB_TRIGS.xlsx';
+        % TrigInpath = '';  % put path in to VERB_TRIGS.xlsx here.
+
+        % ParamInfile = 'EEGVR_L2_Parameters.mat';
+        % ParamInpath = ''; % Put path to EEGVR_L2_Parameters.mat file here.
+
         trigdataIn = readtable(fullfile(TrigInpath, TrigInfile),'FileType','spreadsheet'); % HERE YOU NEED TO PUT IN THE PATH TO THE TRIG DATA EXCEL FILE
         load(fullfile(ParamInpath, ParamInfile));
 
