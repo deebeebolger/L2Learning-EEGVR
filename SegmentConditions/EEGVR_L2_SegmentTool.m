@@ -78,6 +78,7 @@ switch answr
 
         [ALLEEG, EEG] = pop_loadset();
         dataset_len = length(ALLEEG);
+        eeglab redraw
 
         for Ecounter = 1:dataset_len
 
@@ -188,11 +189,19 @@ switch answr
             %  Determine the indices of the epochs to segment.
 
             % First check which block to segment.
-            blockindx = find(contains({EEG.event.blocknum},btype(indx_block)));
+            bindx = cell(1,length(indx_block));
+            for bbcnt = 1:length(indx_block)
+                bindx{1,bbcnt} = find(strcmp({EEG.event.blocknum},btype(indx_block(bbcnt))));
+            end
+            blockindx = cell2mat(bindx);
 
             % For these selected blocks detect the correct verb types
-            verbindx = find(contains({EEG.event(blockindx).eventlabels},vtype(indx_verb)));
-            VIndex = blockindx(verbindx);
+            verbIndx = cell(1,length(indx_verb));
+            for vvcnt = 1:length(indx_verb)
+                verbIndx{1,vvcnt} = find(strcmp({EEG.event(blockindx).eventlabels},vtype(indx_verb(vvcnt))));
+            end
+            verbindx_mat = cell2mat(verbIndx);
+            VIndex = blockindx(verbindx_mat);
 
             % For those blocks with the selected verb type, isolate the selected items.
             itemIndx = find(contains({EEG.event(VIndex).items},item_type(indx_item)));
@@ -200,10 +209,17 @@ switch answr
 
             % For those blocks with the selected verb and item type,
             % isolate the selected response.
-            respIndx = find(strcmp({EEG.event(SegIndex).response}, resp_type(indx_resp)));
-            RIndx = SegIndex(respIndx);
+            respIndx = cell(1,2);
+            for ccnt = 1:length(indx_resp)
 
-            % Verb title
+             respIndx{1,ccnt} = find(strcmp({EEG.event(SegIndex).response}, resp_type(indx_resp(ccnt))));
+
+            end
+            respIndx_mat = cell2mat(respIndx);
+            RIndx = SegIndex(respIndx_mat);
+
+            %% Prepare the title of the segmented file.
+
             if length(indx_verb)==length(vtype)
                 toseg_verbs = "allverbs-";
             else
@@ -222,7 +238,7 @@ switch answr
 
             %Response title
              if length(indx_resp) == length(resp_type)
-                toseg_block = "allresponse-";
+                toseg_resp = "allresponse-";
            
             else
                 toseg_resp = resp_type{indx_resp};
