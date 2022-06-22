@@ -180,7 +180,7 @@ switch answr
     
                 [indx_block,tf1] = listdlg('SelectionMode','multiple','ListString',btype);
     
-                [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',item_type);
+                %[indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',item_type);
     
                 [indx_resp, tf3] = listdlg('SelectionMode','multiple','ListString',resp_type);
             end
@@ -202,9 +202,12 @@ switch answr
             end
             verbindx_mat = cell2mat(verbIndx);
             VIndex = blockindx(verbindx_mat);
+            itemtype_tosel = {EEG.event(VIndex).items};
+
+           [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
 
             % For those blocks with the selected verb type, isolate the selected items.
-            itemIndx = find(contains({EEG.event(VIndex).items},item_type(indx_item)));
+            itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
             SegIndex = VIndex(itemIndx);
 
             % For those blocks with the selected verb and item type,
@@ -324,9 +327,10 @@ switch answr
         itypes_all = cell(sum(ix),1);
         [itypes_all{:,1}] = X{1,ix};
         ittype = unique(itypes_all);
-        ix_item   = contains(ittype,'32');
-        itemtype  = cell(sum(ix_item),1);
-        [itemtype{:,1}] = deal(ittype{ix_item,1});
+        ix_item = cell2mat(cellfun(@length, ittype(:), 'UniformOutput', false));
+        
+        itemtype  = cell(sum(ix_item>0),1);
+        [itemtype{:,1}] = deal(ittype{find(ix_item>0),1});
         
         
         %% CHOOSE VERB TYPE, BLOCK NUMBER AND ITEMS
@@ -339,18 +343,27 @@ switch answr
 
         %% Determine the indices of the epochs to segment.
 
-        % First check which block to segment.
+        % First check which block/s were selected to isolate.
+        bindx = cell(1,length(indx_block));
+        for bbcnt = 1:length(indx_block)
+            bindx{1,bbcnt} = find(strcmp({EEG.event.blocknum},btype(indx_block(bbcnt))));
+        end
+        blockindx = cell2mat(bindx);
+
+        % For these selected blocks find the selected verb types
+        verbIndx = cell(1,length(indx_verb));
+        for vvcnt = 1:length(indx_verb)
+            verbIndx{1,vvcnt} = find(strcmp({EEG.event(blockindx).eventlabels},vtype(indx_verb(vvcnt))));
+        end
+        verbindx_mat = cell2mat(verbIndx);
+        VIndex = blockindx(verbindx_mat);
+        itemtype_tosel = {EEG.event(VIndex).items};
+
+        [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
         
-        blockindx = find(contains({EEG.event.blocknum},btype(indx_block)));
-
-        % For these selected blocks detect the correct verb types
-        verbindx = find(contains({EEG.event(blockindx).eventlabels},vtype(indx_verb)));
-        VIndex = blockindx(verbindx);
-
         % For those blocks with the selected verb type, isolate the selected items.
       
-        
-        itemIndx = find(contains({EEG.event(VIndex).items},itemtype(indx_item)));
+        itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
         SegIndex = VIndex(itemIndx);
 
         % Verb title
