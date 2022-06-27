@@ -29,7 +29,7 @@ switch answr
         %will need to define, hard code, the two paths and the names of the
         % files in the following way (uncomment the following lines and
         % comment the above two lines with "uigetfile"):
-        
+
         % TrigInfile = 'VERB_TRIGS.xlsx';
         % TrigInpath = '';  % put path in to VERB_TRIGS.xlsx here.
 
@@ -177,11 +177,9 @@ switch answr
             if Ecounter == 1
 
                 [indx_verb,tf] = listdlg('SelectionMode','multiple','ListString',vtype);
-    
+
                 [indx_block,tf1] = listdlg('SelectionMode','multiple','ListString',btype);
-    
-                %[indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',item_type);
-    
+
                 [indx_resp, tf3] = listdlg('SelectionMode','multiple','ListString',resp_type);
             end
 
@@ -204,7 +202,7 @@ switch answr
             VIndex = blockindx(verbindx_mat);
             itemtype_tosel = {EEG.event(VIndex).items};
 
-           [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
+            [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
 
             % For those blocks with the selected verb type, isolate the selected items.
             itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
@@ -215,7 +213,7 @@ switch answr
             respIndx = cell(1,2);
             for ccnt = 1:length(indx_resp)
 
-             respIndx{1,ccnt} = find(strcmp({EEG.event(SegIndex).response}, resp_type(indx_resp(ccnt))));
+                respIndx{1,ccnt} = find(strcmp({EEG.event(SegIndex).response}, resp_type(indx_resp(ccnt))));
 
             end
             respIndx_mat = cell2mat(respIndx);
@@ -240,9 +238,9 @@ switch answr
 
 
             %Response title
-             if length(indx_resp) == length(resp_type)
+            if length(indx_resp) == length(resp_type)
                 toseg_resp = "allresponse-";
-           
+
             else
                 toseg_resp = resp_type{indx_resp};
             end
@@ -291,136 +289,175 @@ switch answr
 
     case 'SeparateConds'
 
+        fprintf('%s\n', '*********** Select the folder in which to save the separated data************')
         segDir = uigetdir(cd,'Choose a folder in which to save data');
         %segDir = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Segmented_Data',filesep);
-
+       
         [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;                %open eeglab session
         [ALLEEG, EEG] = eeg_store(ALLEEG, EEG, CURRENTSET);
 
-        EEG = pop_loadset();
+        fprintf('%s\n', '*********** Load in the *.set files************')
 
-        [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(EEG.setname),'gui','off'); % current set = xx;
-        EEG = eeg_checkset( EEG );
-        EEG = pop_saveset( EEG, 'filename',char(EEG.setname),'filepath',EEG.filepath);  % Saves a copy of the current resampled dataset to the current directory
+        [ALLEEG, EEG] = pop_loadset();
+        dataset_len = length(ALLEEG);
         eeglab redraw
 
-        %% EXTRAIRE VERB-TYPES, BLOCK-NUMBERS AND ITEMS FROM EEG STRUCTURE
 
-        % Extraire verb-types
+        for Ecounter = 1:dataset_len
 
-        type_all = unique({EEG.event.eventlabels});
-        ix_vtype = contains(type_all,'verb');
-        vtype = cell(sum(ix_vtype),1);
-        [vtype{:,1}] = deal(type_all{1,ix_vtype});
 
-        % Extraire block numbers
+            [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(EEG.setname),'gui','off'); % current set = xx;
+            EEG = eeg_checkset( EEG );
+            EEG = pop_saveset( EEG, 'filename',char(EEG.setname),'filepath',EEG.filepath);  % Saves a copy of the current resampled dataset to the current directory
+            eeglab redraw
 
-        block_all = unique({EEG.event.blocknum});
-        ix_btype  = contains(block_all,'block');
-        btype     = cell(sum(ix_btype),1);
-        [btype{:,1}] = deal(block_all{1,ix_btype});
+            fprintf('File %s loaded\n',EEG.setname)
 
-        % Extraire individual items
+            %% EXTRAIRE VERB-TYPES, BLOCK-NUMBERS AND ITEMS FROM EEG STRUCTURE
 
-        X = {EEG.event.items};
-        ix = cell2mat(cellfun(@ischar, X, 'UniformOutput',false));
-        itypes_all = cell(sum(ix),1);
-        [itypes_all{:,1}] = X{1,ix};
-        ittype = unique(itypes_all);
-        ix_item = cell2mat(cellfun(@length, ittype(:), 'UniformOutput', false));
-        
-        itemtype  = cell(sum(ix_item>0),1);
-        [itemtype{:,1}] = deal(ittype{find(ix_item>0),1});
-        
-        
-        %% CHOOSE VERB TYPE, BLOCK NUMBER AND ITEMS
+            % Extraire verb-types
 
-        [indx_verb,tf] = listdlg('SelectionMode','multiple','ListString',vtype);
+            type_all = unique({EEG.event.eventlabels});
+            ix_vtype = contains(type_all,'verb');
+            vtype = cell(sum(ix_vtype),1);
+            [vtype{:,1}] = deal(type_all{1,ix_vtype});
 
-        [indx_block,tf1] = listdlg('SelectionMode','multiple','ListString',btype);
+            % Extraire block numbers
 
-        [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype);
+            block_all = unique({EEG.event.blocknum});
+            ix_btype  = contains(block_all,'block');
+            btype     = cell(sum(ix_btype),1);
+            [btype{:,1}] = deal(block_all{1,ix_btype});
 
-        %% Determine the indices of the epochs to segment.
+            % Extraire individual items
 
-        % First check which block/s were selected to isolate.
-        bindx = cell(1,length(indx_block));
-        for bbcnt = 1:length(indx_block)
-            bindx{1,bbcnt} = find(strcmp({EEG.event.blocknum},btype(indx_block(bbcnt))));
+            X = {EEG.event.items};
+            ix = cell2mat(cellfun(@ischar, X, 'UniformOutput',false));
+            itypes_all = cell(sum(ix),1);
+            [itypes_all{:,1}] = X{1,ix};
+            ittype = unique(itypes_all);
+            ix_item = cell2mat(cellfun(@length, ittype(:), 'UniformOutput', false));
+
+            itemtype  = cell(sum(ix_item>0),1);
+            [itemtype{:,1}] = deal(ittype{find(ix_item>0),1});
+
+            % Extraire the individual response types
+
+            respcorr = {EEG.event.response}
+            resptype = unique(respcorr);
+            rindx = contains(resptype,'correct')
+            resp_type = resptype(1, rindx);
+
+
+            %% CHOOSE VERB TYPE, BLOCK NUMBER AND ITEMS
+
+            [indx_verb,tf] = listdlg('SelectionMode','multiple','ListString',vtype);
+
+            [indx_block,tf1] = listdlg('SelectionMode','multiple','ListString',btype);
+
+            [indx_resp, tf3] = listdlg('SelectionMode','multiple','ListString',resp_type);
+
+            %% Determine the indices of the epochs to segment.
+
+            % First check which block/s were selected to isolate.
+            bindx = cell(1,length(indx_block));
+            for bbcnt = 1:length(indx_block)
+                bindx{1,bbcnt} = find(strcmp({EEG.event.blocknum},btype(indx_block(bbcnt))));
+            end
+            blockindx = cell2mat(bindx);
+
+            % For these selected blocks find the selected verb types
+            verbIndx = cell(1,length(indx_verb));
+            for vvcnt = 1:length(indx_verb)
+                verbIndx{1,vvcnt} = find(strcmp({EEG.event(blockindx).eventlabels},vtype(indx_verb(vvcnt))));
+            end
+            verbindx_mat = cell2mat(verbIndx);
+            VIndex = blockindx(verbindx_mat);
+            itemtype_tosel = {EEG.event(VIndex).items};
+
+            [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
+
+            % For those blocks with the selected verb type, isolate the selected items.
+
+            itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
+            SegIndex = VIndex(itemIndx);
+
+            % Verb title
+            if length(indx_verb)==length(vtype)
+                toseg_verbs = "allverbs-";
+            else
+                toseg_verbs = vtype{indx_verb} ;
+            end
+
+            % Block title
+            if length(indx_block) == length(btype)
+                toseg_block = "allblocks-";
+            elseif length(indx_block) == 2
+                toseg_block = strcat(btype{indx_block(1)},'_',btype{indx_block(2)});
+            else
+                toseg_block = btype{indx_block};
+            end
+
+            % Response type
+            % For those blocks with the selected verb and item type,
+            % isolate the selected response.
+            respIndx = cell(1,2);
+            for ccnt = 1:length(indx_resp)
+
+                respIndx{1,ccnt} = find(strcmp({EEG.event(SegIndex).response}, resp_type(indx_resp(ccnt))));
+
+            end
+
+            if length(indx_resp)==2
+                toseg_response = "allresponses";
+            elseif length(indx_resp) ==1
+                toseg_response = resp_type{1,indx_resp};
+            end
+            respIndx_mat = cell2mat(respIndx);
+            RIndx = SegIndex(respIndx_mat);
+
+
+            %% Carry out the separation of the conditions
+            EpochIndex = zeros(length([EEG.epoch]),1);
+            for i = 1:length([EEG.epoch])
+
+                EpochIndex(i) = sum(ismember(EEG.epoch(i).event, RIndx));
+
+            end
+
+            EEG = eeg_checkset( EEG );
+            EEG = pop_select( EEG, 'trial',find(EpochIndex));
+            EEG = eeg_checkset( EEG );
+
+            %%
+
+            pathsuj = fullfile(segDir,filesep);
+            D = dir(pathsuj);
+            parent_folder = D.folder;
+
+            if sum(strcmp({D.name},'Conditions')) == 0
+                %%
+
+                mkdir(fullfile(parent_folder,'Conditions'));
+                savedir = fullfile(parent_folder,'Conditions');
+
+            else
+
+                disp('Conditions folder already exists');
+                savedir = fullfile(parent_folder,'Conditions');
+            end
+
+            epoched_name = strcat(EEG.filename(1:end-4),'-',toseg_block,toseg_verbs,'-epoched');
+
+            [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(epoched_name),'gui','off');
+            EEG = eeg_checkset( EEG );
+            %%
+
+            EEG = pop_saveset( EEG, 'filename',char(epoched_name),'filepath',savedir);
+            EEG = eeg_checkset( EEG );
+            eeglab redraw
+
         end
-        blockindx = cell2mat(bindx);
-
-        % For these selected blocks find the selected verb types
-        verbIndx = cell(1,length(indx_verb));
-        for vvcnt = 1:length(indx_verb)
-            verbIndx{1,vvcnt} = find(strcmp({EEG.event(blockindx).eventlabels},vtype(indx_verb(vvcnt))));
-        end
-        verbindx_mat = cell2mat(verbIndx);
-        VIndex = blockindx(verbindx_mat);
-        itemtype_tosel = {EEG.event(VIndex).items};
-
-        [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
-        
-        % For those blocks with the selected verb type, isolate the selected items.
-      
-        itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
-        SegIndex = VIndex(itemIndx);
-
-        % Verb title
-        if length(indx_verb)==length(vtype)
-            toseg_verbs = "allverbs-";
-        else
-            toseg_verbs = vtype{indx_verb} ;
-        end
-
-        % Block title
-        if length(indx_block) == length(btype)
-            toseg_block = "allblocks-";
-        elseif length(indx_block) == 2
-            toseg_block = strcat(btype{indx_block(1)},'_',btype{indx_block(2)});
-        else
-            toseg_block = btype{indx_block};
-        end
-
-        %% Carry out the separation of the conditions 
-        EpochIndex = zeros(length([EEG.epoch]),1);
-        for i = 1:length([EEG.epoch])
-
-           EpochIndex(i) = sum(ismember(EEG.epoch(i).event, SegIndex));
-
-        end
-
-        EEG = eeg_checkset( EEG );
-        EEG = pop_select( EEG, 'trial',find(EpochIndex));
-        EEG = eeg_checkset( EEG );
-
-        %%
-        
-        pathsuj = fullfile(segDir,filesep);
-        D = dir(pathsuj);
-        parent_folder = D.folder;
-        
-        if sum(strcmp({D.name},'Conditions')) == 0
-        %% 
-
-            mkdir(fullfile(parent_folder,'Conditions'));
-            savedir = fullfile(parent_folder,'Conditions');
-
-        else
-
-            disp('Conditions folder already exists');
-            savedir = fullfile(parent_folder,'Conditions');
-        end
-
-        epoched_name = strcat(EEG.filename(1:end-4),'-',toseg_block,toseg_verbs,'-epoched');
-
-        [ALLEEG, EEG, CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET,'setname',char(epoched_name),'gui','off');
-        EEG = eeg_checkset( EEG );
-%% 
-         
-        EEG = pop_saveset( EEG, 'filename',char(epoched_name),'filepath',savedir);
-        EEG = eeg_checkset( EEG );
-        eeglab redraw
 
 
     otherwise
