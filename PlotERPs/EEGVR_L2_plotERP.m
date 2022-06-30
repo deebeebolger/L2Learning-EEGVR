@@ -5,6 +5,8 @@
 
 
 %% LOAD IN EEG DATA 
+
+study_session = 'VBP';
 conds  = {'Filler', 'Test'};
 numsuj = 2;
 condnames = conds;
@@ -15,7 +17,8 @@ trialcnt     = zeros(2,size(conds,2));
 
 for condcnt = 1:length(conds)
 
-    toplotERPDir = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Segmented_Data','VBP',conds{1,condcnt},filesep);
+    
+    toplotERPDir = fullfile(filesep,'Users','bolger','Documents','work','Projects','Projet-L2-VREEG',study_session,conds{1,condcnt},filesep);
     filenum      = dir(strcat(toplotERPDir,'*.set'));
     filenom      = {filenum.name};
     
