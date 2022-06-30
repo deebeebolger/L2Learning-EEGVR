@@ -289,7 +289,7 @@ switch answr
 
     case 'SeparateConds'
 
-        fprintf('%s\n', '*********** Select the folder in which to save the separated data************')
+        fprintf('%s\n', '*********** Select the folder in which to save the separated data ************')
         segDir = uigetdir(cd,'Choose a folder in which to save data');
         %segDir = fullfile(filesep,'Volumes','deepassport','Projects','Projet-L2-VREEG','Processed_Segmented_Data',filesep);
        
@@ -373,14 +373,17 @@ switch answr
             end
             verbindx_mat = cell2mat(verbIndx);
             VIndex = blockindx(verbindx_mat);
-            itemtype_tosel = {EEG.event(VIndex).items};
+            itemtype_tosel = {EEG.event(VIndex).type};
 
             [indx_item,tf2] = listdlg('SelectionMode','multiple','ListString',itemtype_tosel);
 
             % For those blocks with the selected verb type, isolate the selected items.
+% 
+%             itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
+%             SegIndex = VIndex(itemIndx);
+              itemIndx = find(contains({EEG.event(VIndex).type},itemtype_tosel(indx_item)));
+              SegIndex = VIndex(itemIndx);
 
-            itemIndx = find(contains({EEG.event(VIndex).items},itemtype_tosel(indx_item)));
-            SegIndex = VIndex(itemIndx);
 
             % Verb title
             if length(indx_verb)==length(vtype)

@@ -23,7 +23,8 @@ set(f1,'Color',[1 1 1]);
 axs = zeros(1,size(topermut,2));
 linz = zeros(1,size(topermut,2));
            
-[axs1,ploth1] = plot_ConfInt2(Cond1,time,nanmean(Cond1,1)',colrz(1,:));   %Call of plotConfInt2() function to calculate and plot the 95% CI (sem)
+[axs1,ploth1] = plot_ConfInt2(Cond1,time,nanmean(Cond1,1)','r');           % 'b' = blue, 'k' = black  'm' = magenta
+%[axs1,ploth1] = plot_ConfInt2(Cond1,time,nanmean(Cond1,1)',colrz(1,:));   %Call of plotConfInt2() function to calculate and plot the 95% CI (sem)
 hold on
 axs(1,1) = axs1;
 linz(1,1) = ploth1;

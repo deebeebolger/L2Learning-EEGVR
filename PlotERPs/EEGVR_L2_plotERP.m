@@ -8,7 +8,7 @@
 
 study_session = 'VBP';
 conds  = {'Filler', 'Test'};
-numsuj = 2;
+numsuj = 2;                   % The number of datasets or subjects.
 condnames = conds;
 
 data_meansuj = cell(1,size(conds,2));
