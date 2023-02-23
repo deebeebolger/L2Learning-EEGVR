@@ -1,0 +1,15 @@
+Basedir /Users/bolger/Documents/work/Projects/Projet-L2-VREEG/
+Datadir /Users/bolger/Documents/work/Projects/Projet-L2-VREEG/Data/
+Savedir /Users/bolger/Documents/work/Projects/Projet-L2-VREEG/Data/
+Chaninfodir /Users/bolger/Documents/MATLAB/DeeScripts/Script_Projets/project-L2EEGVR/Chaninfo.mat
+Chanlocdir /Users/bolger/Documents/MATLAB/eeglab13_6_5b/plugins/dipfit2.3/Standard_BESA/standard-10-5-cap385.elp
+sujnum 
+srate 512                
+electrodes 72            
+fc_low 0.4                
+fc_hi 40                
+wind_low -0.5            
+wind_hi 1.000                             
+blc_low -500             
+blc_hi 0   
+references 6566
